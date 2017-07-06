@@ -1,0 +1,118 @@
+<% content_for :page_title do %>
+    <%= plural_resource_name(Spree::Event) %>
+<% end %>
+
+<% content_for :page_actions do %>
+    <%= button_link_to "New Event", new_object_url, { :class => "btn-success", :icon => 'add', :id => 'admin_new_event' } %>
+<% end if can?(:create, Spree::Event) %>
+
+<% content_for :table_filter do %>
+    <div data-hook="admin_products_sidebar">
+
+      <%= search_form_for [:admin, @search] do |f| %>
+          <%- locals = {:f => f} %>
+          <div data-hook="admin_products_index_search" class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <%= f.label :name_cont, Spree.t(:name) %>
+                <%= f.text_field :name_cont, :value => params[:q][:name_cont], :size => 15, class: "form-control js-quick-search-target" %>
+              </div>
+            </div>
+
+            <div class="date-range-filter col-md-12">
+              <div class="form-group">
+                <%= label_tag :q_created_at_gt, Spree.t(:created_time_range) %>
+                <div class="row no-padding-bottom">
+                  <div class="col-md-6">
+                    <div class="input-group">
+                      <%= f.text_field :created_at_gt, :class => 'datepicker datepicker-from form-control', :value => params[:q][:created_at_gt], :placeholder => Spree.t(:start) %>
+                      <span class="input-group-addon"><i class="icon icon-calendar"></i> </span>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="input-group">
+                      <%= f.text_field :created_at_lt, :class => 'datepicker datepicker-to form-control', :value => params[:q][:created_at_lt], :placeholder => Spree.t(:stop) %>
+                      <span class="input-group-addon"><i class="icon icon-calendar"></i></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="col-md-2">
+              <div class="field checkbox">
+                <label>
+                  <%= f.check_box :show_hidden, {:checked => params[:q][:show_hidden] != '0'}, '1', '0' %>
+                  <%= Spree.t(:show_hidden) %>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div data-hook="admin_products_index_search_buttons" class="form-actions">
+            <%= button Spree.t(:search), 'search' %>
+          </div>
+      <% end %>
+
+    </div>
+<% end %>
+
+<%= render partial: 'spree/admin/shared/index_table_options', locals: { collection: @collection } %>
+<% if @collection.any? %>
+    <table class="table sortable" id="listing_events"  data-hook="events_table" data-sortable-link="<%= update_positions_admin_events_url(@collection, format: :js) %>">
+      <thead>
+      <tr data-hook="admin_events_index_headers">
+        <th></th>
+        <th>Id</th>
+        <th>Image</th>
+        <th><%= sort_link @search, :name, Spree.t(:name), { default_order: "desc" }, {title: 'admin_events_listing_name_title'} %></th>
+        <th>
+          <%= sort_link @search, :start_time, 'Start Time', {}, {title: 'admin_events_start_time'} %>
+        </th>
+        <th>
+          <%= sort_link @search, :end_time, 'End Time', {}, {title: 'admin_events_end_time'} %>
+        </th>
+        <th>
+          <%= sort_link @search, :created_at, 'Created At', {default_order: 'desc'}, {title: 'admin_events_created_at'} %>
+        </th>
+        <th>
+          <%= sort_link @search, :updated_at, 'Updated At', {default_order: 'desc'}, {title: 'admin_events_updated_at'} %>
+        </th>
+        <th>Hidden</th>
+        <th>Item Count</th>
+        <th data-hook="admin_events_index_header_actions" class="actions"></th>
+      </tr>
+      </thead>
+      <tbody>
+      <% @collection.each do |event| %>
+          <tr id="<%= spree_dom_id event %>" data-hook="admin_events_index_rows" class="<%= cycle('odd', 'even') %>">
+            <td class="move-handle text-center">
+              <span class="icon icon-move handle"></span>
+            </td>
+            <td><%= event.id %></td>
+            <td class="image">
+              <%= image_tag event.maybe.event_image.attachment.url(:cover).just, height: 50, width: 100 %>
+            </td>
+            <td><%= link_to event.try(:name), edit_admin_event_path(event.friendly_id) %></td>
+            <td><%= event.start_time %></td>
+            <td><%= event.end_time %></td>
+            <td><%= event.created_at %></td>
+            <td><%= event.updated_at %></td>
+            <td><%= event.hidden %></td>
+            <td><%= event.products.count %></td>
+            <td class="actions actions-1 text-right" data-hook="admin_events_index_row_actions">
+              <%= link_to_edit event, no_text: true, class: 'edit' if can?(:edit, event) %>
+              <%= link_to_delete event, no_text: true if can?(:delete, event) && !event.deleted? %>
+            </td>
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
+<% else %>
+    <div class="alert alert-info no-objects-found">
+      <%= Spree.t(:no_resource_found, resource: plural_resource_name(Spree::Event)) %>,
+      <%= link_to Spree.t(:add_one), new_object_url %>!
+    </div>
+<% end %>
+
+<%= render partial: 'spree/admin/shared/index_table_options', locals: { collection: @collection } %>

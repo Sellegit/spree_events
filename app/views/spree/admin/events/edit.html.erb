@@ -1,0 +1,129 @@
+<% content_for :page_actions do %>
+    <% if can?(:create, Spree::Event) %>
+        <%= button_link_to "New Event", new_object_url, { :class => 'btn-success', :icon => 'add', :id => 'admin_new_event' } %>
+    <% end %>
+<% end %>
+
+<%= render :partial => 'spree/admin/shared/error_messages', :locals => { :target => @event } %>
+
+<%= form_for [:admin, @event], :method => :put, :html => { :multipart => true } do |f| %>
+    <fieldset>
+      <div data-hook="admin_event_form_fields">
+
+        <div data-hook="admin_event_form_name">
+          <%= f.field_container :name, class: ['form-group'] do %>
+              <%= f.label :name, raw(Spree.t(:name) + content_tag(:span, ' *', class: 'required')) %>
+              <%= f.text_field :name, class: 'form-control title' %>
+              <%= f.error_message_on :name %>
+          <% end %>
+        </div>
+
+        <div data-hook="admin_event_form_description">
+          <%= f.field_container :description, class: ['form-group'] do %>
+              <%= f.label :description, Spree.t(:description)  %>
+              <%= f.text_area :description, class: 'form-control' %>
+              <%= f.error_message_on :description %>
+          <% end %>
+        </div>
+
+        <div data-hook="admin_event_form_start_time">
+          <%= f.field_container :start_time, class: ['form-group'] do %>
+              <%= f.label :start_time, 'Start Time' %>
+              <%= f.error_message_on :start_time %>
+              <%= f.text_field :start_time, value: @event.start_time, class: 'datetimepicker form-control' %>
+          <% end %>
+        </div>
+
+        <div data-hook="admin_event_form_end_time">
+          <%= f.field_container :end_time, class: ['form-group'] do %>
+              <%= f.label :end_time, 'End Time' %>
+              <%= f.error_message_on :end_time %>
+              <%= f.text_field :end_time, value: @event.end_time, class: 'datetimepicker form-control' %>
+          <% end %>
+        </div>
+
+        <div class="form-group event_hidden">
+          <%= f.field_container :hidden, class: ['form-group'] do %>
+              <%= f.label :hidden, 'Hidden' %>
+              <%= f.error_message_on :hidden%>
+              <%= f.check_box :hidden, value: @event.hidden, class: 'form-control' %>
+          <% end %>
+        </div>
+
+        <div data-hook="admin_event_event_image">
+          <%= f.field_container :event_image, class: ['form-group'] do %>
+              <%= f.label :event_image, raw("Cover Image" + content_tag(:span, ' *', class: 'required')) %>
+              <%= f.file_field :attachment, name: "event[event_image][attachment]" %>
+              <%= f.error_message_on :event_image %>
+              <% if @event.event_image %>
+                  <%= link_to image_tag(
+                      @event.event_image.attachment.url(:cover),
+                      width: 100, height: 50),
+                    @event.event_image.attachment.url(:cover)
+                  %>
+              <% else %>
+                  <span>No Cover Image Yet</span>
+              <% end %>
+          <% end %>
+        </div>
+
+        <div class="form-group event_products">
+          <%= label_tag "event_product_ids_string", "Products" %>
+          <%= hidden_field_tag "event[product_ids_string]", @event.products.pluck(:id).join(","), :class => "product_picker" %>
+        </div>
+
+        <%= render :partial => 'spree/admin/shared/edit_resource_links' %>
+      </div>
+    </fieldset>
+  <% end %>
+
+<div class="form-group" style="margin-top: 30px">
+  <% if @event.event_products.any? %>
+    <table class="table table-striped sortable" data-hook="products_table" data-sortable-link="<%= update_positions_admin_event_event_products_url(@event, @event.event_products) %>">
+      <thead>
+        <tr data-hook="products_header">
+          <th></th>
+          <th>Product Id</th>
+        <th>
+          <%= Spree.t(:thumbnail) %>
+        </th>
+        <th>
+          Name
+        </th>
+        <th>
+          Brand
+        </th>
+        <th>
+          On Hand
+        </th>
+        <th class="actions"></th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <% (@products || []).each do |product| %>
+          <% css_class = product.available? ? '' : "gray-background" %>
+          <tr id="<%= spree_dom_id(product.event_products.find_by(event_id: @event.id)) %>" data-hook="products_row" class="<%= css_class %>">
+            <td class="move-handle text-center">
+              <span class="icon icon-move handle"></span>
+            </td>
+            <td><%= product.id %></td>
+            <td class="product">
+              <%= link_to image_tag(product.maybe.images.first.attachment.url(:small).just), spree.edit_admin_product_url(product) %>
+            </td>
+            <td><%= product.name %></td>
+            <td><%= product.property(:brand) %></td>
+            <td><%= product.total_on_hand %></td>
+            <td class="actions actions-2 text-right">
+              <%= link_to_with_icon('edit', Spree.t(:edit), spree.edit_admin_product_url(product), class: 'btn btn-primary btn-sm', no_text: true, data: { action: 'edit' }) if can? :edit, product %>
+            </td>
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
+<% else %>
+    <div class="alert alert-info no-objects-found">
+      <%= Spree.t(:no_resource_found, resource: plural_resource_name(Spree::Product)) %>,
+    </div>
+<% end %>
+</div>

@@ -1,0 +1,36 @@
+<%= render :partial => 'spree/admin/shared/error_messages', :locals => { :target => @event } %>
+
+<% content_for :page_title do %>
+    New Event
+<% end %>
+
+<%= form_for [:admin, @event], :html => { :multipart => true } do |f| %>
+  <fieldset data-hook="new_event">
+    <%= f.field_container :name, :class => ['form-group'] do %>
+      <%= f.label :name, Spree.t(:name) %> <span class="required">*</span>
+      <%= f.text_field :name, :class => 'form-control title' %>
+      <%= f.error_message_on :name %>
+    <% end %>
+
+    <div data-hook="admin_event_form_start_time">
+      <%= f.field_container :start_time, class: ['form-group'] do %>
+          <%= f.label :start_time, 'Start Time' %> <span class="required">*</span>
+          <%= f.error_message_on :start_time %>
+          <%= f.text_field :start_time, value: datepicker_field_value(@event.start_time), class: 'datepicker form-control' %>
+      <% end %>
+    </div>
+
+    <div data-hook="admin_event_form_end_time">
+      <%= f.field_container :end_time, class: ['form-group'] do %>
+          <%= f.label :end_time, 'End Time' %> <span class="required">*</span>
+          <%= f.error_message_on :end_time %>
+          <%= f.text_field :end_time, value: datepicker_field_value(@event.end_time), class: 'datepicker form-control' %>
+      <% end %>
+    </div>
+
+    <%= hidden_field_tag "event[hidden]", true %>
+
+    <%= render :partial => 'spree/admin/shared/new_resource_links' %>
+  </fieldset>
+<% end %>
+
