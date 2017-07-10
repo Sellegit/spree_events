@@ -12,4 +12,12 @@ Spree::Core::Engine.routes.draw do
       end
     end 
   end
+
+  namespace :api do
+    namespace :v1 do
+      resources :events, only: [:index, :show], defaults: {format: :json} do
+        get 'popular_events' => 'events#popular_events', on: :collection
+      end
+    end
+  end
 end
