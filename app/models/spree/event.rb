@@ -16,7 +16,8 @@ module Spree
     accepts_nested_attributes_for :event_image
 
     scope :sorted, -> { order("#{Spree::Event.table_name}.position ASC") }
-    scope :visible, -> { where("#{Event.table_name}.start_time <= ?", Time.zone.now).where(hidden: false) }
+    scope :visible, -> { where("#{Spree::Event.table_name}.start_time <= ?", Time.zone.now).where(hidden: false) }
+    scope :not_deleted, -> { where("#{Spree::Event.quoted_table_name}.deleted_at IS NULL or #{Spree::Event.quoted_table_name}.deleted_at >= ?", Time.zone.now) }
 
     def available_products
       products.where('available_on is not null and available_on < ?', Time.current)
