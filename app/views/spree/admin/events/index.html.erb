@@ -91,7 +91,9 @@
             </td>
             <td><%= event.id %></td>
             <td class="image">
-              <%= image_tag event.maybe.event_image.attachment.url(:cover).just, height: 50, width: 100 %>
+              <% if event.event_image.present? %>
+                <%= image_tag event.maybe.event_image.attachment.url(:cover).just, height: 50, width: 100 %>
+              <% end %>
             </td>
             <td><%= link_to event.try(:name), edit_admin_event_path(event.friendly_id) %></td>
             <td><%= event.start_time %></td>

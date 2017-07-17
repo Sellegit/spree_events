@@ -11,8 +11,6 @@ module Spree
     has_many :event_products, -> { order(:position) }
     has_many :products, through: :event_products
 
-
-
     accepts_nested_attributes_for :event_image
 
     scope :sorted, -> { order("#{Spree::Event.table_name}.position ASC") }
