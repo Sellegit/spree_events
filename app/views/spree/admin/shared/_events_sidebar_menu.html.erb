@@ -1,0 +1,5 @@
+<% if can? :admin, Spree::Event %>
+  <ul class="nav nav-sidebar">
+    <%= tab Spree::Event, url: spree.admin_events_url, icon: 'file', label: plural_resource_name(Spree::Event) %>
+  </ul>
+<% end %>
